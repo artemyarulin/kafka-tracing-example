@@ -5,6 +5,7 @@ import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.Consumed
+import org.apache.kafka.streams.kstream.Produced
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -13,7 +14,7 @@ class KafkaStreamsManyToOne(val config: Config) {
     val log = LoggerFactory.getLogger(this::class.java)
     val stream = {
         val props = mapOf(
-            StreamsConfig.APPLICATION_ID_CONFIG to "kafka-streams-one-to-many",
+            StreamsConfig.APPLICATION_ID_CONFIG to "kafka-streams-many-to-one",
             StreamsConfig.BOOTSTRAP_SERVERS_CONFIG to config.kafka
         ).toProperties()
         log.info("Starting stream many to one")
@@ -23,10 +24,10 @@ class KafkaStreamsManyToOne(val config: Config) {
                 Consumed.with(Serdes.String(), Serdes.Long())
             )
                 .mapValues { k, v ->
-                    log.info("Processing $k and $v")
+                    log.info("[* to 1] Processing $k and $v")
                     v + 4
                 }
-                .to(config.topic + "_4")
+                .to(config.topic + "_4", Produced.with(Serdes.String(), Serdes.Long()))
         }
         KafkaStreams(builder.build(), props).start()
     }()
