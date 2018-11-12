@@ -36,7 +36,10 @@ dependencies {
     compile "io.projectreactor.kafka:reactor-kafka"
     compile "org.apache.kafka:kafka-clients:2.0.0"
     compile "org.apache.kafka:kafka-streams:2.0.0"
+    // For tracing, first two are required for kafka and kafka streams
+    // while last one can be replaced with other available reporters
     compile "io.zipkin.brave:brave-instrumentation-kafka-clients:5.5.0"
+    compile "io.zipkin.brave:brave-instrumentation-kafka-streams:5.5.0"
     compile 'io.zipkin.reporter2:zipkin-sender-okhttp3:2.7.10'
 }
 

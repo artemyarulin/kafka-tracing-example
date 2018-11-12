@@ -1,26 +1,35 @@
 package app
 
-import brave.Tracer
 import brave.Tracing
 import brave.kafka.clients.KafkaTracing
-import brave.sampler.Sampler
+import brave.kafka.streams.KafkaStreamsTracing
 import org.springframework.stereotype.Component
-import zipkin2.codec.Encoding
 import zipkin2.reporter.AsyncReporter
 import zipkin2.reporter.okhttp3.OkHttpSender
 
+// We are using Spring Boot in this example which has integration with Zipkin
+// but for the example purposes we configure everything manually
 @Component
-class Tracerrr {
-    val trace = {
-        val okHttpSender = OkHttpSender.create("http://127.0.0.1:9411/api/v2/spans")
+class Tracer(val config: Config) {
+    fun kafkaTracer(name: String): KafkaTracing {
+        val okHttpSender = OkHttpSender.create(config.zipkin)
         val reporter = AsyncReporter.create(okHttpSender)
         val tracing = Tracing
             .newBuilder()
-            .localServiceName("Kafkas")
+            .localServiceName(name)
             .spanReporter(reporter)
             .build()
-        KafkaTracing.newBuilder(tracing)
-            .remoteServiceName("my-broker")
+        return KafkaTracing.create(tracing)
+    }
+
+    fun kafkaStreamsTracer(name: String): KafkaStreamsTracing {
+        val okHttpSender = OkHttpSender.create(config.zipkin)
+        val reporter = AsyncReporter.create(okHttpSender)
+        val tracing = Tracing
+            .newBuilder()
+            .localServiceName(name)
+            .spanReporter(reporter)
             .build()
-    }()
+        return KafkaStreamsTracing.create(tracing)
+    }
 }

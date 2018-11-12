@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 import reactor.kafka.receiver.KafkaReceiver
 import reactor.kafka.receiver.ReceiverOptions
 
-// Not yet possible to inject tracing code https://github.com/reactor/reactor-kafka/pull/67
+// Not yet possible to inject tracing code but PR is waiting https://github.com/reactor/reactor-kafka/pull/67
 @Component
 class SpringConsumer(val config: Config) {
     val log = LoggerFactory.getLogger(this::class.java)
@@ -22,10 +22,11 @@ class SpringConsumer(val config: Config) {
         )
         log.info("Starting spring consumer")
         val rcv = KafkaReceiver
-            .create(ReceiverOptions.create<String, String>(props).subscription(listOf(config.kafka)))
+            .create(ReceiverOptions.create<String, String>(props).subscription(listOf(config.topic)))
             .receive()
             .map {
                 log.info("Processed $it")
+                Thread.sleep(1000) // Would we find it in zipkin?
                 it.receiverOffset().acknowledge()
                 it.value()
             }
